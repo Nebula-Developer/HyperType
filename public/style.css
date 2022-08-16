@@ -19,13 +19,18 @@
 
   --input-padding: 100px;
   --input-letter-spacing: 13.5px;
+
+  /* Theme */
+  --background-primary: #003950;
+  --text-default: #82eaff;
+  --text-sub: #00e4ff;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background: #003950;
-  color: #82eaff;
+  background: var(--background-primary);
+  color: var(--text-default);
   font-family: 'Consolas';
   font-weight: 100;
 }
@@ -48,14 +53,14 @@ body {
 
 .nav-icons i {
   font-size: 20px;
-  color: #00e4ff;
+  color: var(--text-sub);
   cursor: pointer;
   margin: 0 10px;
   transition: color 0.1s;
 }
 
 .nav-icons i:hover {
-  color: #82eaff;
+  color: var(--text-default);
 }
 
 .navbar-logo {
@@ -63,7 +68,7 @@ body {
 }
 
 .navbar-logo a {
-  color: #00e4ff;
+  color: var(--text-sub);
   font-family: 'Myriad Pro Light';
   font-weight: 100;
   margin-right: 35px;
@@ -73,7 +78,7 @@ body {
 }   
 
 .navbar-logo a:hover {
-  color: #82eaff;
+  color: var(--text-default);
 }
 /* #endregion */
 
@@ -92,8 +97,7 @@ body {
 }
 
 .results-wrapper {
-  height: calc(100vh - var(--nav-height) - var(--bottom-section-height) - 150px);
-  margin-top: 50px;
+  height: calc(100vh - var(--nav-height) - var(--bottom-section-height));
   width: 100vw;
   position: fixed;
   top: var(--nav-height);
@@ -105,15 +109,15 @@ body {
   flex-direction: column;
   background: rgba(0, 57, 80, 0.85);
   z-index: 10;
-  opacity: 0;
   backdrop-filter: blur(25px);
   transition: opacity 0.25s;
-  pointer-events: none;
 }
 
 #results-graph {
   width: 75vw !important;
   height: 35vw !important;
+  max-width: 650px !important;
+  max-height: 400px !important;
   transition: 1s ease;
 }
 
@@ -191,13 +195,10 @@ letter {
 }
 
 .restart-button-wrapper {
-  position: absolute;
-  bottom: calc(var(--bottom-section-height) + 5px);
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 15;
 }
 
 .restart-button {
@@ -210,12 +211,34 @@ letter {
   border: none;
   background: none;
   border-radius: 20px;
-  transition: outline 0.15s ease;
+  transition: outline 0.15s ease, background 0.15s ease;
+  cursor: pointer;  
 }
 
 /* On tab: */
 .restart-button:focus {
-  outline: 3px solid rgba(193, 255, 255, 0.485);
+  outline: 3px solid rgba(193, 255, 255, 0.5);
+  background: rgba(193, 255, 255, 0.2);
+}
+
+.restart-button:hover {
+  background: rgba(193, 255, 255, 0.2);
+}
+
+.wpm-stats-wrapper {
+  font-size: 18px;
+  color: #82eaff;
+}
+
+.space-incorrect {
+  background: rgba(239, 130, 130, 0.5);
+  box-shadow: 0 0 5px rgba(239, 130, 130, 0.5);
+  margin: 0 2px;
+}
+
+.space {
+  border-radius: 5px;
+  width: 10px;
 }
 
 @keyframes blurIn {

@@ -30,9 +30,9 @@ var typingTimer = {
     }
 }
 
-var config = { words: 10 }
+var config = { words: 3 }
 var userInfo = { }
-var testInfo = { wordsCompleted: 0, wordData: "", inputData: "", currentChar: 0, wpmSector: [ ] }
+var testInfo = { wordsCompleted: 0, wordData: "", inputData: "", currentChar: 0, wpmSector: [ ], errors: 0 }
 //#endregion
 
 /** Calculates wpm based on how fast the test was complete (Speed based) */
@@ -51,7 +51,7 @@ function calculateUpdatingWPM(words) {
     var wpm = ((words * 60) / timerResult) * 1000;
     return {
         raw: wpm,
-        wpm: Math.ceil(wpm)
+        wpm: Math.floor(wpm)
     }
 }
 
@@ -73,6 +73,12 @@ function createSentence(length) {
     return sentence;
 }
 
+/** Calculate accuracy based on the amount of errors */
+function calculateAccuracy(errors, words) {
+    var accuracy = (words - errors) / words * 100;
+    return Math.abs(Math.floor(accuracy * 10) / 10);
+}
+
 /** Append a sentence to the input div */
 function appendSentence(str) {
     // Remove space at the end of the string if it exists
@@ -89,11 +95,13 @@ function appendSentence(str) {
         for (var j = 0; j < wordText.length; j++) {
             var letter = document.createElement('letter');
             letter.innerHTML = wordText[j];
+
             word.appendChild(letter);
         }
         
         if (i !== strSplit.length - 1) {
             var space = document.createElement('letter');
+            space.classList.add('space');
             space.innerHTML = '&nbsp;';
             word.appendChild(space);
         } else {
@@ -167,6 +175,11 @@ function handleInput(e) {
         if (isChar(e.key)) {
             if (ctrl || alt) return;
 
+            if (testInfo.wordData[testInfo.currentChar] != e.key) {
+                testInfo.errors++;
+                console.log(testInfo.wordData[testInfo.currentChar])
+            }
+
             testInfo.currentChar++;
             testInfo.inputData += e.key;
         }
@@ -203,11 +216,16 @@ function checkInput() {
 
     var wpm = calculateUpdatingWPM(testInfo.wordsCompleted);
     if (testInfo.wordsCompleted > 0) {
-        $('#wpm').html(wpm.wpm);
+        $('.wpm').html(wpm.wpm);
         testInfo.wpmSector.push(wpm.wpm);
     } else {
-        $('#wpm').html('0');
+        $('.wpm').html('0');
     }
+
+    var acc = calculateAccuracy(testInfo.errors, testInfo.inputData.length);
+    if (acc > 100 || acc < 0) acc = 0;
+    if (acc > 100 && testInfo.errors > 1) acc = 0;
+    $('.acc').html(acc);
 
     for (var i = 0; i < inputData.length; i++) {
         var charElem = document.getElementById('input').getElementsByTagName('letter')[i];
@@ -215,9 +233,14 @@ function checkInput() {
         if (inputData[i] == wordData[i]) {
             charElem.classList.add('correct');
             charElem.classList.remove('incorrect');
+            charElem.classList.remove('space-incorrect');
         } else {
             charElem.classList.add('incorrect');
             charElem.classList.remove('correct');
+
+            if (charElem.innerHTML == '&nbsp;') {
+                charElem.classList.add('space-incorrect');
+            }
         }
     }
 
@@ -225,6 +248,7 @@ function checkInput() {
         var charElem = document.getElementById('input').getElementsByTagName('letter')[i];
         charElem.classList.remove('correct');
         charElem.classList.remove('incorrect');
+        charElem.classList.remove('space-incorrect');
     }
 }
 
@@ -236,14 +260,21 @@ function finishTest() {
     updateData();
 
     var wpm = calculateWordWPM(testInfo.wordsCompleted);
-    $('#wpm').html(wpm.wpm);
+    $('.wpm').html(wpm.wpm);
+    var acc = calculateAccuracy(testInfo.errors, testInfo.wordData.length - 1);
+    if (acc > 100 || acc < 0) acc = "0";
+    $('.acc').html(acc);
+
+    $('.typing-wrapper').css('display', 'none');
+
+    // make wpmSector start half way through the array
+    var wpmSector = testInfo.wpmSector;
+    var wpmSectorStart = Math.floor(wpmSector.length / 2);
+    testInfo.wpmSector = wpmSector.slice(wpmSectorStart, wpmSector.length);
 
     input.classList.add('input-end-blur');
 
     $(".results-wrapper").css('display', 'flex');
-    setTimeout(() => {
-        $(".results-wrapper").css('opacity', '1');
-    }, 50);
 
     var chartParent = $("#results-graph").parent();
     $("#results-graph").remove();
@@ -255,7 +286,7 @@ function finishTest() {
         data: {
             labels: testInfo.wpmSector.map(function(x) { return x; }),
             datasets: [{
-                label: 'WPM',
+                label: 'Words Per Minute',
                 data: testInfo.wpmSector,
                 backgroundColor: 'rgba(0, 228, 255, 0.2)',
                 borderColor: 'rgba(0, 228, 255, 1)',
@@ -278,7 +309,21 @@ function finishTest() {
                 }]
             },
             tension: 0.4,
-            responsive: true
+            responsive: true,
+            hover: {
+                mode: null
+            },
+            elements: {
+                point: {
+                    radius: 0
+                }
+            },
+            legend: {
+                labels: {
+                    fontColor: 'rgba(0, 228, 255, 1)',
+                    fontSize: 15
+                }
+            }
         }
     });
 
@@ -301,12 +346,12 @@ function handleCaret() {
 
 $("#restart").on('click', () => {
     $("#restart").blur();
+    $('.typing-wrapper').css('display', 'flex');
     $("#input").html("<div id=\"caret\"></div>");
-    testInfo = { wordsCompleted: 0, wordData: "", inputData: "", currentChar: 0, wpmSector: [ ] }
-    appendSentence(createSentence(10));
+    testInfo = { wordsCompleted: 0, wordData: "", inputData: "", currentChar: 0, wpmSector: [ ], errors: 0 }
+    appendSentence(createSentence(config.words));
 
-    $("#results-graph").css("opacity", "0");
-    setTimeout(() => { $(".results-wrapper").css('display', 'none'); }, 500);
+    $(".results-wrapper").css('display', 'none');
     input.classList.remove('input-end-blur');
 
     updateData();
@@ -330,6 +375,8 @@ function tabHandle(e) {
 document.addEventListener('keydown', handleInput);
 document.addEventListener('keydown', tabHandle);
 document.addEventListener('mousedown', () => { tabLock = false; });
-appendSentence(createSentence(10));
+appendSentence(createSentence(config.words));
 setInterval(handleCaret, 100);
 updateData();
+
+console.log(calculateAccuracy(50, 100) + "% acc");
