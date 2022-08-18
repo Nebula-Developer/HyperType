@@ -30,7 +30,7 @@ var typingTimer = {
     }
 }
 
-var config = { words: 3 }
+var config = { words: 50 }
 var userInfo = { }
 var testInfo = { wordsCompleted: 0, wordData: "", inputData: "", currentChar: 0, wpmSector: [ ], errors: 0 }
 //#endregion
@@ -140,31 +140,15 @@ function isChar(key) {
     return key.length === 1 && key.match(/[a-zA-Z!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~ ]/);
 }
 
-//#region Key events
-var ctrl = false;
-var alt = false;
-
-function handleInputEvents(e) {
-    if (e.key === 'Control') ctrl = true;
-    if (e.key === 'Alt') alt = true;
-}
-
-function handleInputEventsUp(e) {
-    if (e.key === 'Control') ctrl = false;
-    if (e.key === 'Alt') alt = false;
-}
-
-document.addEventListener('keydown', handleInputEvents);
-document.addEventListener('keyup', handleInputEventsUp);
-//#endregion
-
 /* Input handling */
 function handleInput(e) {
-    if (e.key === 'Control') ctrl = true;
+    console.log("a");
 
     if (isTyping) {
+        console.log("b");
         if (testInfo.currentChar >= testInfo.wordData.length - 1) return;
         if (!startedTimer) { startedTimer = true; typingTimer.startTimer(); }
+        console.log("c");
 
         if (e.key == 'Backspace' || e.key == 'Delete') {
             testInfo.currentChar--;
@@ -173,7 +157,9 @@ function handleInput(e) {
         }
 
         if (isChar(e.key)) {
-            if (ctrl || alt) return;
+            console.log("d");
+            if (e.ctrlKey) return;
+            console.log("e");
 
             if (testInfo.wordData[testInfo.currentChar] != e.key) {
                 testInfo.errors++;
@@ -182,6 +168,7 @@ function handleInput(e) {
 
             testInfo.currentChar++;
             testInfo.inputData += e.key;
+            console.log("f");
         }
         
         checkInput();
@@ -232,14 +219,14 @@ function checkInput() {
 
         if (inputData[i] == wordData[i]) {
             charElem.classList.add('correct');
-            charElem.classList.remove('incorrect');
-            charElem.classList.remove('space-incorrect');
+            charElem.classList.remove('error');
+            charElem.classList.remove('space-error');
         } else {
-            charElem.classList.add('incorrect');
+            charElem.classList.add('error');
             charElem.classList.remove('correct');
 
             if (charElem.innerHTML == '&nbsp;') {
-                charElem.classList.add('space-incorrect');
+                charElem.classList.add('space-error');
             }
         }
     }
@@ -247,8 +234,8 @@ function checkInput() {
     for (var i = inputData.length; i < wordData.length; i++) {
         var charElem = document.getElementById('input').getElementsByTagName('letter')[i];
         charElem.classList.remove('correct');
-        charElem.classList.remove('incorrect');
-        charElem.classList.remove('space-incorrect');
+        charElem.classList.remove('error');
+        charElem.classList.remove('space-error');
     }
 }
 
@@ -276,65 +263,69 @@ function finishTest() {
 
     $(".results-wrapper").css('display', 'flex');
 
-    var chartParent = $("#results-graph").parent();
-    $("#results-graph").remove();
-    chartParent.append('<canvas id="results-graph"></canvas>');
-    var chart = $("#results-graph").get(0).getContext("2d");
+    var chartParent = $("#wpmGraph").parent();
+    $("#wpmGraph").remove();
 
-    var myChart = new Chart(chart, {
+    chartParent.append('<canvas id="wpmGraph"></canvas>');
+    var ctx = $("#wpmGraph");
+
+    /*var myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: testInfo.wpmSector.map(function(x) { return x; }),
+            labels: testInfo.wpmSector.map(function (wpm) { return wpm + ' wpm'; }),
             datasets: [{
-                label: 'Words Per Minute',
+                label: 'WPM',
                 data: testInfo.wpmSector,
-                backgroundColor: 'rgba(0, 228, 255, 0.2)',
-                borderColor: 'rgba(0, 228, 255, 1)',
-                borderWidth: 2
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'red',
+                borderWidth: 1
             }]
         },
         options: {
             scales: {
                 yAxes: [{
                     ticks: {
-                        beginAtZero: true,
-                        fontColor: 'rgba(0, 228, 255, 1)',
-                        fontSize: 20
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        display: false
+                        beginAtZero:true
                     }
                 }]
             },
-            tension: 0.4,
             responsive: true,
-            hover: {
-                mode: null
-            },
-            elements: {
-                point: {
-                    radius: 0
-                }
-            },
+            maintainAspectRatio: false,
+            showScale: false,
             legend: {
-                labels: {
-                    fontColor: 'rgba(0, 228, 255, 1)',
-                    fontSize: 15
-                }
-            }
+                display: false
+            }   
         }
     });
 
-
-    myChart.update();
+    myChart.update();*/
 }
 
 /** Move caret to the input location */
 function handleCaret() {
     var caret = $("#caret");
     var letters = $("#input").find("letter");
+
+    var curOffset = letters[testInfo.currentChar].offsetTop;
+    var nOffsetLock = -1;
+
+    for (var i = 0; i < letters.length; i++) {
+        if (nOffsetLock != -1 && letters[i].offsetTop > letters[nOffsetLock].offsetTop) {
+            letters[i].classList.add('hidden');
+        } else if (nOffsetLock == -1) {
+            if (letters[i].offsetTop > curOffset) { newOffset = letters[i].offsetTop; nOffsetLock = i; i--; }
+    
+            if (letters[i].offsetTop < curOffset) {
+                letters[i].classList.add('hidden');
+            } else {
+                letters[i].classList.remove('hidden');
+            }
+        } else {
+            letters[i].classList.remove('hidden');
+        }
+    }
+
+    $("#input").css("transform", "translateY(" + -curOffset + "px)");
     var currentLetter = letters[testInfo.currentChar];
 
     var caretLeft = currentLetter.offsetLeft;
@@ -380,3 +371,10 @@ setInterval(handleCaret, 100);
 updateData();
 
 console.log(calculateAccuracy(50, 100) + "% acc");
+handleCaret();
+
+window.onload = function () {
+    setTimeout(() => {
+        $('*').css('transition', 'all var(--primary-transition-time) ease');
+    }, 100);
+}

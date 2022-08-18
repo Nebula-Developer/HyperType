@@ -9,57 +9,44 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="main.js" defer></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="themes/nebula.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>HyperType</title>
 </head>
 <body>
-    <div class="navbar">
-        <div class="navbar-logo">
-            <h1><a href=".">HyperType</a></h1>
-        </div>
-
-        <div class="nav-icons">
-            <i class="fas fa-user"></i>
-            <i class="fas fa-cog"></i>
-            <i class="fas fa-trophy"></i>
-            <i class="fas fa-info"></i>
-        </div>
-    </div>
-
-    <div class="typing-wrapper">
-        <div class="input-wrapper">
-            <div id="input">
-                <!-- This is controlled by main.js -->
-                <div id="caret"></div>
+    <div class="main-content">
+        <div class="top">
+            <div class="navbar">
+                <div class="navbar-logo">
+                    <p class="navbar-logo-top">Nebula</p>
+                    <a href=".">HyperType</a>
+                </div>
+        
+                <div class="nav-icons">
+                    <a href="."><i class="fas fa-user"></i></a>
+                    <a href="."><i class="fas fa-cog"></i></a>
+                    <a href="."><i class="fas fa-trophy"></i></a>
+                    <a href="."><i class="fas fa-info"></i></a>
+                </div>
             </div>
         </div>
-
         
-        <h1 class="wpm-wrapper">
-            <span class="wpm">0</span>
-            wpm
-        </h1>
-
-        <h1 class="acc-wrapper">
-            <span class="acc">0</span>%
-        </h1>
-    </div>
-    
-    <div class="results-wrapper">
-        <canvas id="results-graph"></canvas>
-        <h1 class="wpm-stats-wrapper">
-            <span class="wpm">0</span>
-            wpm
-        </h1>
-
-        <h1 class="acc-stats-wrapper">
-            <span class="acc">0</span>% Accuracy
-        </h1>
-    </div>
-
-    <div class="bottom-section">
-        <div class="restart-button-wrapper">
-            <button class="restart-button" id="restart" tabindex="1"><i class="fas fa-redo"></i></button>
+        <div class="middle">
+            <div class="typing-wrapper">
+                <div class="input-wrapper">
+                    <div id="input">
+                        <div id="caret"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom">
+            <div class="bottom-section">
+                <div class="restart-button-wrapper">
+                    <button class="restart-button" id="restart" tabindex="1"><i class="fas fa-fw fa-redo-alt"></i></button>
+                </div>
+            </div>
         </div>
     </div>
 </body>

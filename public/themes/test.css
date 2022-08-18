@@ -1,0 +1,15 @@
+:root {
+    --primary-background: #ffffff;
+    --primary-text: #ffffff;
+    --alt-text: #19007e;
+    --dim-text: #3700ff;
+    --dim-button: #3f2d81;
+    --dim-background: #6153951c;
+    --primary-border-radius: 8px;
+    --primary-transition-time: 0.125s;
+
+    --correct: #0022ff99;
+    --error: #cfbff7;
+    --input-border-radius: 15px;
+    --caret-move-time: 0.1s;
+}
